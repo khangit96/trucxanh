@@ -5,7 +5,12 @@ package com.example.khangnhd.myapplication.model;
  */
 
 public class Item {
+  public Item(int id, String img) {
+    this.id = id;
+    this.img = img;
+  }
+
   public int id;
-  public int img;
+  public String img;
 
 }
