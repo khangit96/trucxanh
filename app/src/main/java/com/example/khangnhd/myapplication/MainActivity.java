@@ -5,7 +5,12 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -21,78 +26,34 @@ import java.util.Random;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
-    ImageView img;
-
     Item[][] boardGame;
     List<Item> itemList;
     String imgPathList[];
-    Integer[] listColIndex;
-    Integer[] listRowIndex;
+
+    private static final int MY_BUTTON = 9000;
+
+    LinearLayout lnMain;
+
+    //Size boardgame
+    int m = 2, n = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Init control
-        img = findViewById(R.id.img);
+        lnMain = (LinearLayout) findViewById(R.id.lnMain);
 
-        itemList = loadImages();
-        chooseListItem(2, 2);
+        itemList = loadImagesFromAssets();
 
-//        listColIndex = new Integer[2];
-//        listRowIndex = new Integer[2];
-//
-//        int countCol = 0;
-//
-//        boardGame = new Item[2][2];
-//
-//        for (int i = 0; i < 2; i++) {
-//            int count = 1;
-//            Item item = itemList[i];
-//
-//            while (count <= 2) {
-//                //Random col index
-//                int col = (int) (Math.random() * 2 + 0);
-//
-//                if (listColIndex.length == 0) {
-//                    listColIndex[countCol] = col;
-//                    countCol++;
-//                } else {
-//                    while (contains(listColIndex, col)) {
-//                        col = (int) (Math.random() * 2 + 0);
-//                    }
-//                    countCol++;
-//                    listColIndex[countCol] = col;
-//                }
-//
-//                Log.d("test", "col:" + col);
-//
-//
-////                //Push col into listColIndex
-////
-//
-//
-////                int row = (int) (Math.random() * 2 + 0);
-////                boardGame[row][col] = item;
-////
-////
-////                Log.d("test", "[" + row + "]" + "[" + col + "]" + boardGame[row][col].img);
-//                count++;
-//            }
-//        }
-//
-//
-//        Glide.with(this)
-//                .load(Uri.parse("file:///android_asset/img/pikachu.png"))
-//                .into(img);
+        chooseListItem();
 
     }
 
     /*
     Load image from assets into itemlist
     * */
-    public List<Item> loadImages() {
+    public List<Item> loadImagesFromAssets() {
         List<Item> list = new ArrayList<>();
 
         //Load image from assets into itemlist
@@ -110,20 +71,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
-    * */
-    public void level(int n, int m) {
-
-    }
-
-    /*
         Choose List item
     * */
-    public void chooseListItem(int m, int n) {
-        List<Item> itemListTemp = loadImages();
+    public void chooseListItem() {
+        boardGame = new Item[m][n];
+        List<Item> itemListTemp = loadImagesFromAssets();
         ArrayList<Integer> arrayTempt = new ArrayList<>();
         int quantity = (m * n) / 2;
 
-        int len = m * n;
         for (int j = 0; j < m * n; j++) {
             arrayTempt.add(j);
         }
@@ -140,33 +95,79 @@ public class MainActivity extends AppCompatActivity {
 
             int x1 = gt1 / n;
             int y1 = gt1 % n;
+
             //gan vo board
+
+            boardGame[x1][y1] = itemListTemp.get(index);
             arrayTempt.remove(index1);
-//
-//            //Index2
+
+            //Index2
             int index2 = rand.nextInt(arrayTempt.size());
             int gt2 = arrayTempt.get(index2);
 
             int x2 = gt2 / n;
             int y2 = gt2 % n;
+
+            boardGame[x2][y2] = itemListTemp.get(index);
+
             //gan vo board
             arrayTempt.remove(index2);
 
             Log.d("test", "[x1,y1]=" + x1 + "," + y1);
             Log.d("test", "[x2,y2]=" + x2 + "," + y2);
+
             itemListTemp.remove(index);
 
         }
+        //Load item into board game
+        loadItemIntoBoardGame();
+    }
 
 
+    /*
+    * Load item into board game
+    * */
+    public void loadItemIntoBoardGame() {
+        //Display to board game
+        for (int i = 0; i < m; i++) {
+            LinearLayout lnRow = new LinearLayout(this);
+            lnRow.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            lnRow.setOrientation(LinearLayout.HORIZONTAL);
+            lnRow.setGravity(Gravity.CENTER);
+            lnMain.addView(lnRow);
+
+            for (int j = 0; j < n; j++) {
+                final ImageButton imgButton = new ImageButton(this);
+
+                final Item item = boardGame[i][j];
+                loadImageUsingGlide("default.png", imgButton);
+
+                LinearLayout.LayoutParams layoutparams = (LinearLayout.LayoutParams) imgButton.getLayoutParams();
+                imgButton.setLayoutParams(new LinearLayout.LayoutParams(250, 250));
+                imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
+
+                imgButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        loadImageUsingGlide(item.img, imgButton);
+                        Toast.makeText(getApplicationContext(), "" + item.img, Toast.LENGTH_LONG).show();
+                    }
+                });
+                lnRow.addView(imgButton);
+            }
+
+        }
     }
 
     /*
-    Check if exist value in array interger
+    * load image using Glide library
     * */
-    public static boolean contains(Integer[] arr, int item) {
-        List<Integer> list = Arrays.asList(arr);
-        Set<Integer> set = new HashSet<Integer>(list);
-        return set.contains(item);
+    public void loadImageUsingGlide(String imgName, ImageButton imgButton) {
+        Glide.with(this)
+                .load(Uri.parse("file:///android_asset/img/" + imgName))
+                .override(200, 200)
+                .into(imgButton);
+
+
     }
 }
