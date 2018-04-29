@@ -5,7 +5,6 @@
     android:id="@+id/lnMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
     android:padding="20dp"
     tools:context="com.example.khangnhd.myapplication.MainActivity">

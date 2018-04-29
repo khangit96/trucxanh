@@ -7,7 +7,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -18,12 +19,8 @@ import com.example.khangnhd.myapplication.model.Item;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     Item[][] boardGame;
@@ -33,9 +30,17 @@ public class MainActivity extends AppCompatActivity {
     private static final int MY_BUTTON = 9000;
 
     LinearLayout lnMain;
+    List<Integer> listRowClick;
+    List<Integer> listColumnClick;
 
     //Size boardgame
     int m = 2, n = 4;
+
+    int countClickItem = 0;
+    String imgName = "";
+
+    String imgPathDefault = "file:///android_asset/default/default.png";
+    String imgPath = "file:///android_asset/img/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < quantity; i++) {
             Random rand = new Random();
             int index = rand.nextInt(itemListTemp.size()) + 0;
-            Log.d("test", "index:" + itemListTemp.get(index).img);
+            // Log.d("test", "index:" + itemListTemp.get(index).img);
 
 
             //Index1
@@ -113,8 +118,8 @@ public class MainActivity extends AppCompatActivity {
             //gan vo board
             arrayTempt.remove(index2);
 
-            Log.d("test", "[x1,y1]=" + x1 + "," + y1);
-            Log.d("test", "[x2,y2]=" + x2 + "," + y2);
+//            Log.d("test", "[x1,y1]=" + x1 + "," + y1);
+//            Log.d("test", "[x2,y2]=" + x2 + "," + y2);
 
             itemListTemp.remove(index);
 
@@ -128,29 +133,71 @@ public class MainActivity extends AppCompatActivity {
     * Load item into board game
     * */
     public void loadItemIntoBoardGame() {
+        listRowClick = new ArrayList<>();
+        listColumnClick = new ArrayList<>();
+
+
         //Display to board game
         for (int i = 0; i < m; i++) {
-            LinearLayout lnRow = new LinearLayout(this);
+            final LinearLayout lnRow = new LinearLayout(this);
             lnRow.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             lnRow.setOrientation(LinearLayout.HORIZONTAL);
             lnRow.setGravity(Gravity.CENTER);
             lnMain.addView(lnRow);
+            lnRow.setTag(i);
 
             for (int j = 0; j < n; j++) {
                 final ImageButton imgButton = new ImageButton(this);
 
                 final Item item = boardGame[i][j];
-                loadImageUsingGlide("default.png", imgButton);
+                loadImageUsingGlide(imgPathDefault, imgButton);
 
-                LinearLayout.LayoutParams layoutparams = (LinearLayout.LayoutParams) imgButton.getLayoutParams();
                 imgButton.setLayoutParams(new LinearLayout.LayoutParams(250, 250));
+
                 imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
+                imgButton.setId(j);
 
                 imgButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        loadImageUsingGlide(item.img, imgButton);
-                        Toast.makeText(getApplicationContext(), "" + item.img, Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(getApplicationContext(), "Row:" + lnRow.getId() + "Column:" + imgButton.getId(), Toast.LENGTH_LONG).show();
+
+                        loadImageUsingGlide(imgPath + item.img, imgButton);
+
+                        listRowClick.add(Integer.parseInt(lnRow.getTag().toString()));
+                        listColumnClick.add(imgButton.getId());
+
+                        countClickItem++;
+
+                        if (countClickItem == 2) {
+
+                            countClickItem = 0;
+
+                            if (item.img.equals(imgName)) {
+
+                                for (int i = 0; i < listColumnClick.size(); i++) {
+                                    ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+                                    View viewRemove = row.findViewById(listColumnClick.get(i));
+                                    row.removeView(viewRemove);
+
+                                }
+                            } else {
+
+                                for (int i = 0; i < listColumnClick.size(); i++) {
+                                    ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+                                    ImageButton imgBt = row.findViewById(listColumnClick.get(i));
+                                    loadImageUsingGlide(imgPathDefault, imgBt);
+                                }
+                            }
+
+                            listColumnClick.clear();
+                            listRowClick.clear();
+
+                        } else {
+                            imgName = item.img;
+                        }
+
                     }
                 });
                 lnRow.addView(imgButton);
@@ -162,9 +209,9 @@ public class MainActivity extends AppCompatActivity {
     /*
     * load image using Glide library
     * */
-    public void loadImageUsingGlide(String imgName, ImageButton imgButton) {
+    public void loadImageUsingGlide(String imgPath, ImageButton imgButton) {
         Glide.with(this)
-                .load(Uri.parse("file:///android_asset/img/" + imgName))
+                .load(Uri.parse(imgPath))
                 .override(200, 200)
                 .into(imgButton);
 
