@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     List<Integer> listColumnClick;
 
     //Size boardgame
-    int m = 2, n = 4;
+    int m = 4, n = 4;
 
     int countClickItem = 0;
     String imgName = "";
@@ -137,7 +137,8 @@ public class MainActivity extends AppCompatActivity {
         listColumnClick = new ArrayList<>();
 
 
-        //Display to board game
+        //Display to board game.
+        // Create layout dynamic
         for (int i = 0; i < m; i++) {
             final LinearLayout lnRow = new LinearLayout(this);
             lnRow.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -152,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                 final Item item = boardGame[i][j];
                 loadImageUsingGlide(imgPathDefault, imgButton);
 
-                imgButton.setLayoutParams(new LinearLayout.LayoutParams(250, 250));
+                imgButton.setLayoutParams(new LinearLayout.LayoutParams(170, 170));
 
                 imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
                 imgButton.setId(j);
@@ -161,8 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
-                        Toast.makeText(getApplicationContext(), "Row:" + lnRow.getId() + "Column:" + imgButton.getId(), Toast.LENGTH_LONG).show();
-
+                        //Load image into image button
                         loadImageUsingGlide(imgPath + item.img, imgButton);
 
                         listRowClick.add(Integer.parseInt(lnRow.getTag().toString()));
@@ -170,31 +170,51 @@ public class MainActivity extends AppCompatActivity {
 
                         countClickItem++;
 
+                        //Check click twice only
                         if (countClickItem == 2) {
-
-                            countClickItem = 0;
-
-                            if (item.img.equals(imgName)) {
-
-                                for (int i = 0; i < listColumnClick.size(); i++) {
-                                    ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
-                                    View viewRemove = row.findViewById(listColumnClick.get(i));
-                                    row.removeView(viewRemove);
-
-                                }
+                            //prevent one item click twice
+                            if (imgButton.getId() == listColumnClick.get(0) && Integer.parseInt(lnRow.getTag().toString()) == listRowClick.get(0)) {
+                                countClickItem = 1;
+                                //Clear
+                                listColumnClick.remove(1);
+                                listRowClick.remove(1);
+                                Toast.makeText(getApplicationContext(), "cannot click twice", Toast.LENGTH_LONG).show();
                             } else {
+                                countClickItem = 0;
+                                //Check if two item equal
+                                if (item.img.equals(imgName)) {
+                                    //  loadImageUsingGlide(imgPath + item.img, imgButton);
+                                    Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
+//                                    try {
+//                                        Thread.sleep(2000);
+//                                    } catch (InterruptedException e) {
+//                                        e.printStackTrace();
+//                                    }
+                                    for (int i = 0; i < listColumnClick.size(); i++) {
+                                        ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+                                        View viewRemove = row.findViewById(listColumnClick.get(i));
+                                        row.removeView(viewRemove);
 
-                                for (int i = 0; i < listColumnClick.size(); i++) {
-                                    ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
-                                    ImageButton imgBt = row.findViewById(listColumnClick.get(i));
-                                    loadImageUsingGlide(imgPathDefault, imgBt);
+                                    }
                                 }
+                                //Set item default
+                                else {
+
+                                    for (int i = 0; i < listColumnClick.size(); i++) {
+                                        ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+                                        ImageButton imgBt = row.findViewById(listColumnClick.get(i));
+                                        loadImageUsingGlide(imgPathDefault, imgBt);
+                                    }
+                                }
+                                //Clear
+                                listColumnClick.clear();
+                                listRowClick.clear();
                             }
 
-                            listColumnClick.clear();
-                            listRowClick.clear();
 
-                        } else {
+                        }
+                        //Track one item before
+                        else {
                             imgName = item.img;
                         }
 
