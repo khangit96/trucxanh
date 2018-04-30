@@ -1,4 +1,4 @@
-package com.example.khangnhd.myapplication;
+package com.example.khangnhd.myapplication.activity;
 
 import android.content.res.AssetManager;
 import android.net.Uri;
@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.khangnhd.myapplication.R;
 import com.example.khangnhd.myapplication.model.Item;
 
 import java.io.IOException;
@@ -185,11 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (item.img.equals(imgName)) {
                                     //  loadImageUsingGlide(imgPath + item.img, imgButton);
                                     Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
-//                                    try {
-//                                        Thread.sleep(2000);
-//                                    } catch (InterruptedException e) {
-//                                        e.printStackTrace();
-//                                    }
+
                                     for (int i = 0; i < listColumnClick.size(); i++) {
                                         ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
                                         View viewRemove = row.findViewById(listColumnClick.get(i));
