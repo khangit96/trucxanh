@@ -2,6 +2,8 @@ package com.example.khangnhd.myapplication.activity;
 
 import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -22,6 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     Item[][] boardGame;
@@ -42,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
 
     String imgPathDefault = "file:///android_asset/default/default.png";
     String imgPath = "file:///android_asset/img/";
+    boolean check = false;
+
+    private Timer mTimer1;
+    private TimerTask mTt1;
+    int count = 0;
+    private Handler mTimerHandler = new Handler();
+    String imgNameClick = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
                         listColumnClick.add(imgButton.getId());
 
                         countClickItem++;
+                        imgNameClick = item.img;
 
                         //Check click twice only
                         if (countClickItem == 2) {
@@ -182,30 +195,7 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "cannot click twice", Toast.LENGTH_LONG).show();
                             } else {
                                 countClickItem = 0;
-                                //Check if two item equal
-                                if (item.img.equals(imgName)) {
-                                    //  loadImageUsingGlide(imgPath + item.img, imgButton);
-                                    Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
-
-                                    for (int i = 0; i < listColumnClick.size(); i++) {
-                                        ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
-                                        View viewRemove = row.findViewById(listColumnClick.get(i));
-                                        row.removeView(viewRemove);
-
-                                    }
-                                }
-                                //Set item default
-                                else {
-
-                                    for (int i = 0; i < listColumnClick.size(); i++) {
-                                        ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
-                                        ImageButton imgBt = row.findViewById(listColumnClick.get(i));
-                                        loadImageUsingGlide(imgPathDefault, imgBt);
-                                    }
-                                }
-                                //Clear
-                                listColumnClick.clear();
-                                listRowClick.clear();
+                                startTimer();
                             }
 
 
@@ -223,6 +213,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /*
+    Load Image default into boardgame
+    * */
+    public void loadImageDefault() {
+        for (int i = 0; i < listColumnClick.size(); i++) {
+            ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+            ImageButton imgBt = row.findViewById(listColumnClick.get(i));
+            loadImageUsingGlide(imgPathDefault, imgBt);
+        }
+    }
+
     /*
     * load image using Glide library
     * */
@@ -234,4 +236,88 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    private void stopTimer() {
+        if (mTimer1 != null) {
+            mTimer1.cancel();
+            mTimer1.purge();
+        }
+    }
+
+    private void startTimer() {
+        mTimer1 = new Timer();
+        mTt1 = new TimerTask() {
+            public void run() {
+                mTimerHandler.post(new Runnable() {
+                    public void run() {
+                        count++;
+                        if (count == 2) {
+                            count = 0;
+                            stopTimer();
+                            if (imgNameClick.equals(imgName)) {
+                                Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
+
+                                for (int i = 0; i < listColumnClick.size(); i++) {
+                                    ViewGroup row = lnMain.findViewWithTag(listRowClick.get(i));
+                                    View viewRemove = row.findViewById(listColumnClick.get(i));
+                                    row.removeView(viewRemove);
+
+                                }
+                            } else {
+                                loadImageDefault();
+                            }
+
+                            //Clear
+                            listColumnClick.clear();
+                            listRowClick.clear();
+                        }
+                    }
+                });
+            }
+        };
+
+        mTimer1.schedule(mTt1, 1, 1000);
+    }
+
+    private void threadMsg(String msg) {
+
+        if (!msg.equals(null) && !msg.equals("")) {
+            Message msgObj = handler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putString("message", msg);
+            msgObj.setData(b);
+            handler.sendMessage(msgObj);
+        }
+    }
+
+    // Define the Handler that receives messages from the thread and update the progress
+    private final Handler handler = new Handler() {
+
+        public void handleMessage(Message msg) {
+            check = true;
+            Toast.makeText(getApplicationContext(), "Received", Toast.LENGTH_LONG).show();
+
+//            String aResponse = msg.getData().getString("message");
+//
+//            if ((null != aResponse)) {
+//
+//                // ALERT MESSAGE
+//                Toast.makeText(
+//                        getBaseContext(),
+//                        "Server Response: "+aResponse,
+//                        Toast.LENGTH_SHORT).show();
+//            }
+//            else
+//            {
+//
+//                // ALERT MESSAGE
+//                Toast.makeText(
+//                        getBaseContext(),
+//                        "Not Got Response From Server.",
+//                        Toast.LENGTH_SHORT).show();
+//            }
+
+        }
+    };
+
 }

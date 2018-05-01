@@ -9,5 +9,4 @@
     android:padding="20dp"
     tools:context="com.example.khangnhd.myapplication.activity.MainActivity">
 
-
 </LinearLayout>
