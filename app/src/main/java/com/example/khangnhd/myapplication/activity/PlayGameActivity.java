@@ -1,9 +1,15 @@
 package com.example.khangnhd.myapplication.activity;
 
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.akexorcist.roundcornerprogressbar.IconRoundCornerProgressBar;
+import com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar;
 import com.bumptech.glide.Glide;
 import com.example.khangnhd.myapplication.R;
 import com.example.khangnhd.myapplication.model.Item;
@@ -30,7 +38,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class PlayGameActivity extends AppCompatActivity {
     Item[][] boardGame;
     List<Item> itemList;
     String imgPathList[];
@@ -47,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     int countClickItem = 0;
     String imgName = "";
 
-    String imgPathDefault = "file:///android_asset/default/question3.png";
+    String imgPathDefault = "file:///android_asset/default/question1.png";
     String imgPath = "file:///android_asset/img/";
     boolean check = false;
 
@@ -57,6 +65,25 @@ public class MainActivity extends AppCompatActivity {
     private Handler mTimerHandler = new Handler();
     String imgNameClick = "";
 
+    //Sound
+    public AudioManager audioManager;
+    private int soundIDGameOver;
+    private int soundIDPause;
+    private int soundIDChooseItem;
+    private int soundIDSuccess;
+    private SoundPool soundPool;
+    private float maxVolume;
+    private float actVolume;
+    private float volume;
+
+    //Timer play game
+    private Timer timerPlaygame;
+    private TimerTask timerTaskPlayGame;
+    private float timeEscape;
+
+    //Progressbar timer
+    private RoundCornerProgressBar progressTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,18 +91,42 @@ public class MainActivity extends AppCompatActivity {
         // Set fullscreen
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        // Set No Title
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         setContentView(R.layout.activity_main);
 
+        startTimerPlaygame();
+
         lnMain = (LinearLayout) findViewById(R.id.lnMain);
-
         itemList = loadImagesFromAssets();
-
         chooseListItem();
 
+        initSound();
+    }
+
+    /*
+    * Init sound
+    * */
+    public void initSound() {
+        // AudioManager audio settings for adjusting the volume
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        actVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        volume = actVolume / maxVolume;
+
+        //Hardware buttons setting to adjust the media sound
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        //  soundIDSuccess = soundPool.load(this, R.raw.success, 1);
+        //    soundIDGameOver = soundPool.load(this, R.raw.gover, 1);
+        //   soundIDPause = soundPool.load(this, R.raw.pause, 1);
+        soundIDChooseItem = soundPool.load(this, R.raw.choose_item, 1);
+    }
+
+    /*
+    * Play sound
+    * */
+    public void playSound(int soundID) {
+        soundPool.play(soundID, volume, volume, 1, 0, 1.0f);
     }
 
     /*
@@ -171,20 +222,21 @@ public class MainActivity extends AppCompatActivity {
             lnRow.setTag(i);
 
             for (int j = 0; j < n; j++) {
+                final Item item = boardGame[i][j];
                 final ImageButton imgButton = new ImageButton(this);
 
-                final Item item = boardGame[i][j];
                 loadImageUsingGlide(imgPathDefault, imgButton);
                 imgButton.setBackgroundResource(R.drawable.customize_image_button);
                 imgButton.setLayoutParams(new LinearLayout.LayoutParams(210, 220));
-
                 imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
                 imgButton.setId(j);
-                imgButton.setPadding(10,10,10,10);
+                imgButton.setPadding(10, 10, 10, 10);
 
                 imgButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+
+                        playSound(soundIDChooseItem);
 
                         //Load image into image button
                         loadImageUsingGlide(imgPath + item.img, imgButton);
@@ -248,13 +300,47 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void stopTimer() {
-        if (mTimer1 != null) {
-            mTimer1.cancel();
-            mTimer1.purge();
+    /*
+    * Start timer play game
+    * */
+    private void startTimerPlaygame() {
+        timeEscape = 0;
+        progressTimer = (RoundCornerProgressBar) findViewById(R.id.progressTime);
+        progressTimer.setProgressColor(Color.parseColor("#56d2c2"));
+
+        progressTimer.setMax(100);
+        timerPlaygame = new Timer();
+        timerTaskPlayGame = new TimerTask() {
+            public void run() {
+                mTimerHandler.post(new Runnable() {
+                    public void run() {
+                        timeEscape += 1.666;
+                        progressTimer.setProgress((float) 100 - timeEscape);
+                        if (timeEscape >= 100) {
+                            Toast.makeText(getApplicationContext(), "Game Over", Toast.LENGTH_LONG).show();
+                            stopTimer(timerPlaygame);
+                        }
+                    }
+                });
+            }
+        };
+
+        timerPlaygame.schedule(timerTaskPlayGame, 1, 1000);
+    }
+
+    /*
+    *Stop timer
+    * */
+    private void stopTimer(Timer timer) {
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
         }
     }
 
+    /*
+    Start timer click item
+    * */
     private void startTimer() {
         mTimer1 = new Timer();
         mTt1 = new TimerTask() {
@@ -262,9 +348,9 @@ public class MainActivity extends AppCompatActivity {
                 mTimerHandler.post(new Runnable() {
                     public void run() {
                         count++;
-                        if (count ==2) {
+                        if (count == 2) {
                             count = 0;
-                            stopTimer();
+                            stopTimer(mTimer1);
                             if (imgNameClick.equals(imgName)) {
                                 Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
 
@@ -290,45 +376,45 @@ public class MainActivity extends AppCompatActivity {
         mTimer1.schedule(mTt1, 1, 300);
     }
 
-    private void threadMsg(String msg) {
-
-        if (!msg.equals(null) && !msg.equals("")) {
-            Message msgObj = handler.obtainMessage();
-            Bundle b = new Bundle();
-            b.putString("message", msg);
-            msgObj.setData(b);
-            handler.sendMessage(msgObj);
-        }
-    }
+//    private void threadMsg(String msg) {
+//
+//        if (!msg.equals(null) && !msg.equals("")) {
+//            Message msgObj = handler.obtainMessage();
+//            Bundle b = new Bundle();
+//            b.putString("message", msg);
+//            msgObj.setData(b);
+//            handler.sendMessage(msgObj);
+//        }
+//    }
 
     // Define the Handler that receives messages from the thread and update the progress
-    private final Handler handler = new Handler() {
-
-        public void handleMessage(Message msg) {
-            check = true;
-            Toast.makeText(getApplicationContext(), "Received", Toast.LENGTH_LONG).show();
-
-//            String aResponse = msg.getData().getString("message");
+//    private final Handler handler = new Handler() {
 //
-//            if ((null != aResponse)) {
+//        public void handleMessage(Message msg) {
+//            check = true;
+//            Toast.makeText(getApplicationContext(), "Received", Toast.LENGTH_LONG).show();
 //
-//                // ALERT MESSAGE
-//                Toast.makeText(
-//                        getBaseContext(),
-//                        "Server Response: "+aResponse,
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//            else
-//            {
+////            String aResponse = msg.getData().getString("message");
+////
+////            if ((null != aResponse)) {
+////
+////                // ALERT MESSAGE
+////                Toast.makeText(
+////                        getBaseContext(),
+////                        "Server Response: "+aResponse,
+////                        Toast.LENGTH_SHORT).show();
+////            }
+////            else
+////            {
+////
+////                // ALERT MESSAGE
+////                Toast.makeText(
+////                        getBaseContext(),
+////                        "Not Got Response From Server.",
+////                        Toast.LENGTH_SHORT).show();
+////            }
 //
-//                // ALERT MESSAGE
-//                Toast.makeText(
-//                        getBaseContext(),
-//                        "Not Got Response From Server.",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-
-        }
-    };
+//        }
+//    };
 
 }

@@ -7,57 +7,49 @@
     android:background="#32414A"
     android:orientation="vertical"
     android:padding="10dp"
-    tools:context="com.example.khangnhd.myapplication.activity.MainActivity">
+    tools:context="com.example.khangnhd.myapplication.activity.PlayGameActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
-        <!--<Button-->
-            <!--android:padding="10dp"-->
-            <!--android:layout_width="130dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@drawable/level"-->
-            <!--android:text="Level: 1"-->
-            <!--android:textColor="@android:color/white" />-->
         <Button
-            android:padding="10dp"
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:background="@drawable/score"
+            android:background="@drawable/level"
+            android:padding="10dp"
             android:text="Level: 1"
             android:textColor="@android:color/white"
             android:textSize="17sp" />
+
         <Button
-            android:padding="10dp"
             android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="120dp"
             android:background="@drawable/score"
+            android:padding="10dp"
             android:text="Score: 30"
             android:textColor="@android:color/white"
             android:textSize="17sp" />
     </LinearLayout>
 
-    <com.akexorcist.roundcornerprogressbar.IconRoundCornerProgressBar
-        android:id="@+id/progress_2"
+    <com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar
+        android:id="@+id/progressTime"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_marginTop="20dp"
-        app:rcBackgroundPadding="10dp"
-        app:rcIconPadding="5dp"
-        app:rcIconSize="50dp" />
+        android:layout_marginTop="30dp"
+        app:rcBackgroundPadding="5dp" />
 
     <LinearLayout
-        android:padding="10dp"
         android:id="@+id/lnMain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="10dp">
 
     </LinearLayout>
 
