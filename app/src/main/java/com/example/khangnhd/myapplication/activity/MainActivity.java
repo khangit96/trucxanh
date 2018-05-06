@@ -11,6 +11,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     int countClickItem = 0;
     String imgName = "";
 
-    String imgPathDefault = "file:///android_asset/default/default.png";
+    String imgPathDefault = "file:///android_asset/default/question3.png";
     String imgPath = "file:///android_asset/img/";
     boolean check = false;
 
@@ -58,6 +60,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Set fullscreen
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // Set No Title
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         setContentView(R.layout.activity_main);
 
         lnMain = (LinearLayout) findViewById(R.id.lnMain);
@@ -165,11 +175,12 @@ public class MainActivity extends AppCompatActivity {
 
                 final Item item = boardGame[i][j];
                 loadImageUsingGlide(imgPathDefault, imgButton);
-
-                imgButton.setLayoutParams(new LinearLayout.LayoutParams(170, 170));
+                imgButton.setBackgroundResource(R.drawable.customize_image_button);
+                imgButton.setLayoutParams(new LinearLayout.LayoutParams(210, 220));
 
                 imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
                 imgButton.setId(j);
+                imgButton.setPadding(10,10,10,10);
 
                 imgButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -251,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                 mTimerHandler.post(new Runnable() {
                     public void run() {
                         count++;
-                        if (count == 2) {
+                        if (count ==2) {
                             count = 0;
                             stopTimer();
                             if (imgNameClick.equals(imgName)) {
@@ -276,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mTimer1.schedule(mTt1, 1, 1000);
+        mTimer1.schedule(mTt1, 1, 300);
     }
 
     private void threadMsg(String msg) {
