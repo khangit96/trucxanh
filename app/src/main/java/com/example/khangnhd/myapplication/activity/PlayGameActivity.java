@@ -68,7 +68,7 @@ public class PlayGameActivity extends AppCompatActivity {
     //Sound
     public AudioManager audioManager;
     private int soundIDGameOver;
-    private int soundIDPause;
+    private int soundIDChooseFail;
     private int soundIDChooseItem;
     private int soundIDSuccess;
     private SoundPool soundPool;
@@ -116,10 +116,10 @@ public class PlayGameActivity extends AppCompatActivity {
         //Hardware buttons setting to adjust the media sound
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        //  soundIDSuccess = soundPool.load(this, R.raw.success, 1);
-        //    soundIDGameOver = soundPool.load(this, R.raw.gover, 1);
-        //   soundIDPause = soundPool.load(this, R.raw.pause, 1);
+        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
         soundIDChooseItem = soundPool.load(this, R.raw.choose_item, 1);
+        soundIDChooseFail = soundPool.load(this, R.raw.error, 1);
+        soundIDSuccess = soundPool.load(this, R.raw.success, 1);
     }
 
     /*
@@ -227,7 +227,7 @@ public class PlayGameActivity extends AppCompatActivity {
 
                 loadImageUsingGlide(imgPathDefault, imgButton);
                 imgButton.setBackgroundResource(R.drawable.customize_image_button);
-                imgButton.setLayoutParams(new LinearLayout.LayoutParams(210, 220));
+                imgButton.setLayoutParams(new LinearLayout.LayoutParams(150, 150));
                 imgButton.setScaleType(ImageView.ScaleType.FIT_XY);
                 imgButton.setId(j);
                 imgButton.setPadding(10, 10, 10, 10);
@@ -352,6 +352,7 @@ public class PlayGameActivity extends AppCompatActivity {
                             count = 0;
                             stopTimer(mTimer1);
                             if (imgNameClick.equals(imgName)) {
+                                playSound(soundIDSuccess);
                                 Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
 
                                 for (int i = 0; i < listColumnClick.size(); i++) {
@@ -361,6 +362,7 @@ public class PlayGameActivity extends AppCompatActivity {
 
                                 }
                             } else {
+                                playSound(soundIDChooseFail);
                                 loadImageDefault();
                             }
 
