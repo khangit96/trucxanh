@@ -30,6 +30,8 @@ import com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar;
 import com.bumptech.glide.Glide;
 import com.example.khangnhd.myapplication.R;
 import com.example.khangnhd.myapplication.model.Item;
+import com.shashank.sony.fancygifdialoglib.FancyGifDialog;
+import com.shashank.sony.fancygifdialoglib.FancyGifDialogListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,8 +106,8 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    * Init sound
-    * */
+     * Init sound
+     * */
     public void initSound() {
         // AudioManager audio settings for adjusting the volume
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -123,8 +125,8 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    * Play sound
-    * */
+     * Play sound
+     * */
     public void playSound(int soundID) {
         soundPool.play(soundID, volume, volume, 1, 0, 1.0f);
     }
@@ -204,8 +206,8 @@ public class PlayGameActivity extends AppCompatActivity {
 
 
     /*
-    * Load item into board game
-    * */
+     * Load item into board game
+     * */
     public void loadItemIntoBoardGame() {
         listRowClick = new ArrayList<>();
         listColumnClick = new ArrayList<>();
@@ -289,8 +291,8 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    * load image using Glide library
-    * */
+     * load image using Glide library
+     * */
     public void loadImageUsingGlide(String imgPath, ImageButton imgButton) {
         Glide.with(this)
                 .load(Uri.parse(imgPath))
@@ -301,8 +303,36 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    * Start timer play game
+    Show fancey Dialog
     * */
+    public void showDialogGameOver() {
+        new FancyGifDialog.Builder(this)
+                .setTitle("Game Over")
+                .setMessage("You can click 'Restart' button to Restart game.")
+                .setNegativeBtnText("Exit")
+                .setPositiveBtnBackground("#FF4081")
+                .setPositiveBtnText("Restart")
+                .setNegativeBtnBackground("#FFA9A7A8")
+                .setGifResource(R.drawable.gif1)   //Pass your Gif here
+                .isCancellable(true)
+                .OnPositiveClicked(new FancyGifDialogListener() {
+                    @Override
+                    public void OnClick() {
+                        Toast.makeText(getApplicationContext(), "Restart", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .OnNegativeClicked(new FancyGifDialogListener() {
+                    @Override
+                    public void OnClick() {
+                        Toast.makeText(getApplicationContext(), "Exit", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
+    }
+
+    /*
+     * Start timer play game
+     * */
     private void startTimerPlaygame() {
         timeEscape = 0;
         progressTimer = (RoundCornerProgressBar) findViewById(R.id.progressTime);
@@ -317,6 +347,7 @@ public class PlayGameActivity extends AppCompatActivity {
                         timeEscape += 1.666;
                         progressTimer.setProgress((float) 100 - timeEscape);
                         if (timeEscape >= 100) {
+                            showDialogGameOver();
                             Toast.makeText(getApplicationContext(), "Game Over", Toast.LENGTH_LONG).show();
                             stopTimer(timerPlaygame);
                         }
@@ -329,8 +360,8 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    *Stop timer
-    * */
+     *Stop timer
+     * */
     private void stopTimer(Timer timer) {
         if (timer != null) {
             timer.cancel();
