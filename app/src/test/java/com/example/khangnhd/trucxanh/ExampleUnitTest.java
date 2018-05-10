@@ -1,4 +1,4 @@
-package com.example.khangnhd.myapplication;
+package com.example.khangnhd.trucxanh;
 
 import org.junit.Test;
 

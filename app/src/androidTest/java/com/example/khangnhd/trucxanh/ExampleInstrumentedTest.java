@@ -1,4 +1,4 @@
-package com.example.khangnhd.myapplication;
+package com.example.khangnhd.trucxanh;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

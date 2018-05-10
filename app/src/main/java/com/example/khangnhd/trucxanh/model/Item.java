@@ -1,4 +1,4 @@
-package com.example.khangnhd.myapplication.model;
+package com.example.khangnhd.trucxanh.model;
 
 /**
  * Created by khangnhd on 28/04/2018.
