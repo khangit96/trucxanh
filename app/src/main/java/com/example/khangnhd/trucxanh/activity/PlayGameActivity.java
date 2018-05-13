@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -78,6 +79,15 @@ public class PlayGameActivity extends AppCompatActivity {
     //Progressbar timer
     private RoundCornerProgressBar progressTimer;
 
+    //Check win game
+    boolean isGameOver = false;
+
+    //Score
+    int score = 0;
+
+    //
+    Button btScore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,13 +98,24 @@ public class PlayGameActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        startTimerPlaygame();
-
         lnMain = (LinearLayout) findViewById(R.id.lnMain);
+        btScore = findViewById(R.id.btScore);
+
         itemList = loadImagesFromAssets();
-        chooseListItem();
+        startGame();
 
         initSound();
+    }
+
+    /*
+    * Start game
+    * */
+    public void startGame() {
+        score = 0;
+        stopTimer(timerPlaygame);
+        startTimerPlaygame();
+        lnMain.removeAllViews();
+        chooseListItem();
     }
 
     /*
@@ -249,7 +270,7 @@ public class PlayGameActivity extends AppCompatActivity {
                                 //Clear
                                 listColumnClick.remove(1);
                                 listRowClick.remove(1);
-                                Toast.makeText(getApplicationContext(), "cannot click twice", Toast.LENGTH_LONG).show();
+                                //   Toast.makeText(getApplicationContext(), "cannot click twice", Toast.LENGTH_LONG).show();
                             } else {
                                 countClickItem = 0;
                                 startTimer();
@@ -295,7 +316,7 @@ public class PlayGameActivity extends AppCompatActivity {
     }
 
     /*
-    Show fancey Dialog
+    Show fancey Dialog gameover
     * */
     public void showDialogGameOver() {
         new FancyGifDialog.Builder(this)
@@ -306,17 +327,45 @@ public class PlayGameActivity extends AppCompatActivity {
                 .setPositiveBtnText("Restart")
                 .setNegativeBtnBackground("#FFA9A7A8")
                 .setGifResource(R.drawable.gif1)   //Pass your Gif here
-                .isCancellable(true)
+                .isCancellable(false)
                 .OnPositiveClicked(new FancyGifDialogListener() {
                     @Override
                     public void OnClick() {
-                        Toast.makeText(getApplicationContext(), "Restart", Toast.LENGTH_SHORT).show();
+                        startGame();
                     }
                 })
                 .OnNegativeClicked(new FancyGifDialogListener() {
                     @Override
                     public void OnClick() {
-                        Toast.makeText(getApplicationContext(), "Exit", Toast.LENGTH_SHORT).show();
+                        System.exit(1);
+                    }
+                })
+                .build();
+    }
+
+    /*
+    Show fancey Dialog game win
+    * */
+    public void showDialogGameWin() {
+        new FancyGifDialog.Builder(this)
+                .setTitle("Congratulation !")
+                .setMessage("You can click 'Restart' button to Restart game.")
+                .setNegativeBtnText("Exit")
+                .setPositiveBtnBackground("#FF4081")
+                .setPositiveBtnText("Restart")
+                .setNegativeBtnBackground("#FFA9A7A8")
+                .setGifResource(R.drawable.gif1)   //Pass your Gif here
+                .isCancellable(false)
+                .OnPositiveClicked(new FancyGifDialogListener() {
+                    @Override
+                    public void OnClick() {
+                        startGame();
+                    }
+                })
+                .OnNegativeClicked(new FancyGifDialogListener() {
+                    @Override
+                    public void OnClick() {
+                        System.exit(1);
                     }
                 })
                 .build();
@@ -339,8 +388,9 @@ public class PlayGameActivity extends AppCompatActivity {
                         timeEscape += 1.666;
                         progressTimer.setProgress((float) 100 - timeEscape);
                         if (timeEscape >= 100) {
+                            isGameOver = true;
                             showDialogGameOver();
-                            Toast.makeText(getApplicationContext(), "Game Over", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), "Game Over", Toast.LENGTH_LONG).show();
                             stopTimer(timerPlaygame);
                         }
                     }
@@ -375,6 +425,8 @@ public class PlayGameActivity extends AppCompatActivity {
                             count = 0;
                             stopTimer(mTimer1);
                             if (imgNameClick.equals(imgName)) {
+                                score += 5;
+                                btScore.setText("Score: " + score);
                                 playSound(soundIDSuccess);
                                 Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
 
@@ -384,6 +436,13 @@ public class PlayGameActivity extends AppCompatActivity {
                                     row.removeView(viewRemove);
 
                                 }
+
+                                if (!isGameOver) {
+                                    if (score == 40) {
+                                        showDialogGameWin();
+                                    }
+                                }
+
                             } else {
                                 playSound(soundIDChooseFail);
                                 loadImageDefault();
